@@ -65,3 +65,5 @@ __pycache__
 /examples/raw_example
 /examples/raw_example_debug
 /examples/snake_game/snake_game
+
+python/*.egg-info
