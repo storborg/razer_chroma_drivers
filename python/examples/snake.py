@@ -1,3 +1,12 @@
+"""
+A snake game.
+
+A shortcoming of the keyboard as a gaming surface (hah!) is that some of the
+LEDs are occluded or missing. So in the snake game, sometimes the "food" can
+appear on a hidden key. To deal with that, the game also shows an ncurses view
+of the game in the terminal.
+"""
+
 import time
 import random
 import curses

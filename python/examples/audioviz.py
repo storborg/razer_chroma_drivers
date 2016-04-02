@@ -1,3 +1,11 @@
+"""
+A very crude spectrum visualization. Right now it's solid color and very
+low quality, and lags slightly behind the audio.
+
+To set this up you'll probably want to configure PulseAudio to "monitor" the
+system output or one of your applications.
+"""
+
 import sys
 
 import razerdriver

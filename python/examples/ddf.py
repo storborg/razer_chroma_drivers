@@ -1,3 +1,8 @@
+"""
+Plays animation files from the ancient Disco Dance Floor project.
+https://www.scotttorborg.com/disco-dance-floor/downloads.html
+"""
+
 import time
 import struct
 import sys

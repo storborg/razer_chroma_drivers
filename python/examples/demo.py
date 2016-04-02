@@ -1,3 +1,7 @@
+"""
+Cycles through a bunch of example modes.
+"""
+
 import time
 
 import razerdriver

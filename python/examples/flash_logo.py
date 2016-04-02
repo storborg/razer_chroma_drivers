@@ -1,3 +1,7 @@
+"""
+Flash the screen lid logo on and off.
+"""
+
 import time
 
 import razerdriver

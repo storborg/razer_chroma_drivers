@@ -1,3 +1,7 @@
+"""
+Flash the keyboard on and off in solid red.
+"""
+
 import time
 
 import razerdriver

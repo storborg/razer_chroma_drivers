@@ -1,3 +1,7 @@
+"""
+Simple checkered animation demo.
+"""
+
 import time
 
 import razerdriver
