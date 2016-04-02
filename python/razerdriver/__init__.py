@@ -21,16 +21,13 @@ class RazerDevice(object):
 
     def read_device_file(self, filename):
         fullpath = os.path.join(self.path, filename)
-        #print("  reading %d bytes from %s" % (count, filename))
-        with open(fullpath, 'rU') as f:
+        with open(fullpath, 'rbU') as f:
             ret = f.read()
-            #print("  result: %r" % ret)
             return ret
 
     def write_device_file(self, filename, buf):
         fullpath = os.path.join(self.path, filename)
-        #print("  writing to %s: %r" % (fullpath, buf))
-        with open(fullpath, 'w') as f:
+        with open(fullpath, 'wb') as f:
             f.write(buf)
 
     def get_device_type(self):
@@ -64,9 +61,9 @@ class RazerDevice(object):
 
     def set_mode_wave(self, direction):
         if direction == 'left':
-            buf = '2'
+            buf = b'2'
         elif direction == 'right':
-            buf = '1'
+            buf = b'1'
         else:
             raise ValueError("direction must be either 'left' or 'right'")
         self.write_device_file('mode_wave', buf)
@@ -77,12 +74,24 @@ class RazerDevice(object):
             buf += bytearray(col)
         self.write_device_file('set_key_row', buf)
 
+    def set_custom_mode(self):
+        self.write_device_file('mode_custom', b'1')
+
     def set_brightness(self, value):
         self.write_device_file('set_brightness', b'%d' % value)
 
     def set_logo(self, state):
         if state:
-            buf = '1'
+            buf = b'1'
         else:
-            buf = '0'
+            buf = b'0'
         self.write_device_file('set_logo', buf)
+
+    def write_frame(self, frame):
+        assert len(frame) == 6
+        for idx, row in enumerate(frame):
+            if len(row) < 22:
+                pad = [(0, 0, 0)] * (22 - len(row))
+                row.extend(pad)
+            self.set_key_row(idx, row)
+        self.set_custom_mode()
