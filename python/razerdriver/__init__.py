@@ -80,6 +80,12 @@ class RazerDevice(object):
     def set_brightness(self, value):
         self.write_device_file('set_brightness', b'%d' % value)
 
+    def set_function_keys_to_media(self):
+        self.write_device_file('set_fn_toggle', b'1')
+
+    def set_function_keys_to_fn(self):
+        self.write_device_file('set_fn_toggle', b'0')
+
     def set_logo(self, state):
         if state:
             buf = b'1'
@@ -90,6 +96,7 @@ class RazerDevice(object):
     def write_frame(self, frame):
         assert len(frame) == 6
         for idx, row in enumerate(frame):
+            assert len(row) <= 22
             if len(row) < 22:
                 pad = [(0, 0, 0)] * (22 - len(row))
                 row.extend(pad)

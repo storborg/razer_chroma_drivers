@@ -52,13 +52,23 @@ class SnakeGame:
         return frame
 
     def render_curses(self, win):
+
+        def paint(yy, xx, ch):
+            try:
+                win.addch(yy, xx, ch)
+            except curses.error:
+                # There is a stupid issue where printing the last corner of a
+                # window will throw an error, but it still prints. So ignore
+                # the error.
+                pass
+
         win.clear()
         for yy in range(self.rows):
             for xx in range(self.cols):
                 if (xx, yy) in self.snake:
-                    win.addch(yy, xx, curses.ACS_BLOCK)
+                    paint(yy, xx, curses.ACS_BLOCK)
                 elif (xx, yy) == self.food:
-                    win.addch(yy, xx, curses.ACS_DIAMOND)
+                    paint(yy, xx, curses.ACS_DIAMOND)
 
     def random_food_position(self):
         while True:

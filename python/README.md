@@ -25,3 +25,19 @@ Quick start:
 
 A few examples are in the ``examples/`` directory. Note that they may require
 additional dependencies, including ``numpy`` and ``PyAudio``.
+
+### Silly Keyboard Ideas
+
+- monitor system parameters (temperature, cpu load, etc)
+- monitor external data (weather, time of day, location)
+- RF spectrum (either wifi/ble usage or SDR input)
+- snake game (implemented)
+- simon game (partially implemented)
+- tetris? can this work on a 6x16 grid? probably not
+- pong?
+- music/audio visualization (some basic playing around with pyaudio)
+- xorg display driver
+- "ambilight" style where bottom of screen is used to control colors
+- better reactive effects... maybe water ripples emanating from keypresses
+- notifications (flash/change color for email, etc)
+- key heatmap visualization
