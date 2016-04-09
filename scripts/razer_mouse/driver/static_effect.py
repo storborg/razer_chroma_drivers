@@ -18,6 +18,7 @@ def clamp_to_u8(value):
 def parse_args():
     parser = argparse.ArgumentParser(description="Set the static effect")
     parser.add_argument('-d', '--device', type=str, help="Device string like \"0003:1532:0045.000C\"")
+    parser.add_argument('-c', '--channel', type=str, help='LED channel: all, logo, scrollwheel', default='all')
 
     parser.add_argument('--colour', required=True, nargs=3, metavar=("R", "G", "B"), type=int, help="Static colour")
 
@@ -49,7 +50,12 @@ def run():
     values = map(clamp_to_u8, args.colour)
     byte_string = struct.pack(">BBB", *values)
 
-    static_mode_filepath = os.path.join(mouse_dir, "mode_static")
+    filename = {
+        'all': 'mode_static',
+        'logo': 'mode_logo_static',
+        'scrollwheel': 'mode_scrollwheel_static',
+    }[args.channel]
+    static_mode_filepath = os.path.join(mouse_dir, filename)
     with open(static_mode_filepath, 'wb') as static_mode_file:
         static_mode_file.write(byte_string)
     print("Done")

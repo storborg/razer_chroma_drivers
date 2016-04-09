@@ -57,6 +57,7 @@ int razer_send_report(struct usb_device *usb_dev,void const *data) {
  *
  * Supported Devices:
  *   Razer Mamba
+ *   Razer Deathadder Chroma
  */
 void razer_get_serial(struct usb_device *usb_dev, unsigned char* serial_string)
 {
@@ -343,6 +344,7 @@ int razer_set_reactive_mode(struct usb_device *usb_dev, struct razer_rgb *colour
  *
  * Supported by:
  *   Razer Mamba
+ *   Razer Deathadder Chroma (affects logo only, not scrollwheel)
  *
  */
 int razer_set_breath_mode(struct usb_device *usb_dev, unsigned char breathing_type, struct razer_rgb *color1, struct razer_rgb *color2)
@@ -355,6 +357,8 @@ int razer_set_breath_mode(struct usb_device *usb_dev, unsigned char breathing_ty
     report.sub_command = 0x03;
 
     report.command_parameters[0] = breathing_type;
+
+    // XXX Add support for Deathadder Chroma
 
     if(breathing_type == 1 || breathing_type == 2)
     {
@@ -372,6 +376,169 @@ int razer_set_breath_mode(struct usb_device *usb_dev, unsigned char breathing_ty
         report.command_parameters[6] = color2->b;
     }
 
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_send_report(usb_dev, &report);
+    return retval;
+}
+
+
+/**
+ * Clear effect modes on the mouse
+ *
+ * This is a placeholder to add support in the future for the Mamba. It is
+ * totally untested and the parameter values are a wild-ass guess.
+ */
+int razer_set_none_mode(struct usb_device *usb_dev)
+{
+    int retval;
+    struct razer_report report;
+    printk("razermouse: set_none_mode\n");
+    razer_prepare_report(&report);
+    report.parameter_bytes_num = 0x02;
+    report.command = 0x0A;                       /* Change effect command ID */
+    report.sub_command = 0x00;                   /* None mode ID, maybe? */
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_send_report(usb_dev, &report);
+    return retval;
+}
+
+
+/**
+ * Set the static color effect on the mouse logo only
+ *
+ * Supported by:
+ *   Razer Deathadder Chroma
+ */
+int razer_set_logo_static_mode(struct usb_device *usb_dev, struct razer_rgb *colour)
+{
+    int retval;
+    struct razer_report report;
+    printk("razermouse: set_logo_static_mode\n");
+    razer_prepare_report(&report);
+    report.parameter_bytes_num = 0x05;
+    report.command = 0x01;
+    report.sub_command = 0x01;
+    report.command_parameters[0] = 0x04;
+    report.command_parameters[1] = colour->r;
+    report.command_parameters[2] = colour->g;
+    report.command_parameters[3] = colour->b;
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_send_report(usb_dev, &report);
+    return retval;
+}
+
+
+/**
+ * Set the spectrum effect on the mouse logo only
+ *
+ * Supported by:
+ *   Razer Deathadder Chroma
+ */
+int razer_set_logo_spectrum_mode(struct usb_device *usb_dev)
+{
+    int retval;
+    struct razer_report report;
+    printk("razermouse: set_logo_spectrum_mode\n");
+    razer_prepare_report(&report);
+    report.parameter_bytes_num = 0x03;
+    report.command = 0x02;
+    report.sub_command = 0x01;
+    report.command_parameters[0] = 0x04;
+    report.command_parameters[1] = 0x04;
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_send_report(usb_dev, &report);
+    return retval;
+}
+
+
+/**
+ * Clear the effect on the mouse logo only
+ *
+ * Supported by:
+ *   Razer Deathadder Chroma
+ */
+int razer_set_logo_none_mode(struct usb_device *usb_dev)
+{
+    int retval;
+    struct razer_report report;
+    printk("razermouse: set_logo_none_mode\n");
+    razer_prepare_report(&report);
+    report.parameter_bytes_num = 0x03;
+    report.command = 0x00;
+    report.sub_command = 0x01;
+    report.command_parameters[0] = 0x04;
+    report.command_parameters[1] = 0x00;
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_send_report(usb_dev, &report);
+    return retval;
+}
+
+
+/**
+ * Set the static color effect on the scroll wheel only
+ *
+ * Supported by:
+ *   Razer Deathadder Chroma
+ */
+int razer_set_scrollwheel_static_mode(struct usb_device *usb_dev, struct razer_rgb *colour)
+{
+    int retval;
+    struct razer_report report;
+    printk("razermouse: set_scrollwheel_static_mode\n");
+    razer_prepare_report(&report);
+    report.parameter_bytes_num = 0x05;
+    report.command = 0x01;
+    report.sub_command = 0x01;
+    report.command_parameters[0] = 0x01;
+    report.command_parameters[1] = colour->r;
+    report.command_parameters[2] = colour->g;
+    report.command_parameters[3] = colour->b;
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_send_report(usb_dev, &report);
+    return retval;
+}
+
+
+/**
+ * Set the spectrum effect on the scroll wheel only
+ *
+ * Supported by:
+ *   Razer Deathadder Chroma
+ */
+int razer_set_scrollwheel_spectrum_mode(struct usb_device *usb_dev)
+{
+    int retval;
+    struct razer_report report;
+    printk("razermouse: set_scrollwheel_spectrum_mode\n");
+    razer_prepare_report(&report);
+    report.parameter_bytes_num = 0x03;
+    report.command = 0x02;
+    report.sub_command = 0x01;
+    report.command_parameters[0] = 0x01;
+    report.command_parameters[1] = 0x01;
+    report.crc = razer_calculate_crc(&report);
+    retval = razer_send_report(usb_dev, &report);
+    return retval;
+}
+
+
+/**
+ * Clear the effect on the scroll wheel only
+ *
+ * Supported by:
+ *   Razer Deathadder Chroma
+ */
+int razer_set_scrollwheel_none_mode(struct usb_device *usb_dev)
+{
+    int retval;
+    struct razer_report report;
+    printk("razermouse: set_scrollwheel_none_mode\n");
+    razer_prepare_report(&report);
+    report.parameter_bytes_num = 0x03;
+    report.command = 0x00;
+    report.sub_command = 0x01;
+    report.command_parameters[0] = 0x01;
+    report.command_parameters[1] = 0x00;
     report.crc = razer_calculate_crc(&report);
     retval = razer_send_report(usb_dev, &report);
     return retval;
@@ -472,6 +639,7 @@ int razer_set_idle_time(struct usb_device *usb_dev, unsigned short idle_time)
  *
  * Supported by:
  *   Razer Mamba
+ *   Razer Deathadder Chroma
  */
 int razer_set_mouse_dpi(struct usb_device *usb_dev, unsigned short dpi_x, unsigned short dpi_y)
 {
@@ -679,7 +847,14 @@ static ssize_t razer_attr_write_mode_static(struct device *dev, struct device_at
 
     if(count == 3)
     {
-        razer_set_static_mode(usb_dev, (struct razer_rgb*)&buf[0]);
+        if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA)
+        {
+            razer_set_logo_static_mode(usb_dev, (struct razer_rgb*)&buf[0]);
+            razer_set_scrollwheel_static_mode(usb_dev, (struct razer_rgb*)&buf[0]);
+        } else
+        {
+            razer_set_static_mode(usb_dev, (struct razer_rgb*)&buf[0]);
+        }
     }
 
     return count;
@@ -695,7 +870,14 @@ static ssize_t razer_attr_write_mode_spectrum(struct device *dev, struct device_
 {
     struct usb_interface *intf = to_usb_interface(dev->parent);
     struct usb_device *usb_dev = interface_to_usbdev(intf);
-    razer_set_spectrum_mode(usb_dev);
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA)
+    {
+        razer_set_logo_spectrum_mode(usb_dev);
+        razer_set_scrollwheel_spectrum_mode(usb_dev);
+    } else
+    {
+        razer_set_spectrum_mode(usb_dev);
+    }
     return count;
 }
 
@@ -746,6 +928,121 @@ static ssize_t razer_attr_write_mode_breath(struct device *dev, struct device_at
         // "Random" colour mode
         razer_set_breath_mode(usb_dev, 0x03, (struct razer_rgb*)&alt_buf[0], (struct razer_rgb*)&alt_buf[3]);
     }
+    return count;
+}
+
+
+/**
+ * Write device file "mode_none"
+ *
+ * All effect modes are deactivated whenever the file is written to
+ */
+static ssize_t razer_attr_write_mode_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA)
+    {
+        razer_set_logo_none_mode(usb_dev);
+        razer_set_scrollwheel_none_mode(usb_dev);
+    } else
+    {
+        // Mamba
+        razer_set_none_mode(usb_dev);
+    }
+    return count;
+}
+
+
+/**
+ * Write device file "mode_logo_static"
+ *
+ * Set the mouse logo to static mode when 3 RGB bytes are written
+ */
+static ssize_t razer_attr_write_mode_logo_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    if(count == 3)
+    {
+        razer_set_logo_static_mode(usb_dev, (struct razer_rgb*)&buf[0]);
+    }
+    return count;
+}
+
+
+/**
+ * Write device file "mode_logo_spectrum"
+ *
+ * Set the mouse logo to spectrum mode whenever the file is written to
+ */
+static ssize_t razer_attr_write_mode_logo_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    razer_set_logo_spectrum_mode(usb_dev);
+    return count;
+}
+
+
+/**
+ * Write device file "mode_logo_none"
+ *
+ * All mouse logo effect modes are deactivated whenever the file is written to
+ */
+static ssize_t razer_attr_write_mode_logo_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    razer_set_logo_none_mode(usb_dev);
+    return count;
+}
+
+
+/**
+ * Write device file "mode_scrollwheel_static"
+ *
+ * Sets the scrollwheel effect mode to static color when 3 RGB bytes are written
+ */
+static ssize_t razer_attr_write_mode_scrollwheel_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+
+    if(count == 3)
+    {
+        razer_set_scrollwheel_static_mode(usb_dev, (struct razer_rgb*)&buf[0]);
+    }
+    return count;
+}
+
+
+/**
+ * Write device file "mode_scrollwheel_spectrum"
+ *
+ * Sets the scrollwheel effect mode to spectrum whenever the file is written to
+ */
+static ssize_t razer_attr_write_mode_scrollwheel_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    razer_set_scrollwheel_spectrum_mode(usb_dev);
+    return count;
+}
+
+
+/**
+ * Write device file "mode_scrollwheel_none"
+ *
+ * All effect modes are deactivated whenever the file is written to
+ */
+static ssize_t razer_attr_write_mode_scrollwheel_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
+{
+    struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    razer_set_scrollwheel_none_mode(usb_dev);
     return count;
 }
 
@@ -904,11 +1201,21 @@ static ssize_t razer_attr_read_get_serial(struct device *dev, struct device_attr
 static ssize_t razer_attr_read_device_type(struct device *dev, struct device_attribute *attr,
                 char *buf)
 {
-    //struct usb_interface *intf = to_usb_interface(dev->parent);
+    struct usb_interface *intf = to_usb_interface(dev->parent);
     //struct razer_kbd_device *widow = usb_get_intfdata(intf);
-    //struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
 
-    int write_count = sprintf(buf, "Razer Mamba\n");
+    int write_count = 0;
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA)
+    {
+        write_count = sprintf(buf, "Razer Deathadder Chroma\n");
+    } else if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_MAMBA)
+    {
+        write_count = sprintf(buf, "Razer Mamba\n");
+    } else
+    {
+        write_count = sprintf(buf, "Unknown Device\n");
+    }
     return write_count;
 }
 
@@ -924,12 +1231,23 @@ static DEVICE_ATTR(device_type,               0444, razer_attr_read_device_type,
 static DEVICE_ATTR(get_battery,               0444, razer_attr_read_get_battery, NULL);
 static DEVICE_ATTR(get_serial,                0444, razer_attr_read_get_serial,  NULL);
 static DEVICE_ATTR(is_charging,               0444, razer_attr_read_is_charging, NULL);
+
 static DEVICE_ATTR(mode_custom,               0220, NULL, razer_attr_write_mode_custom);
 static DEVICE_ATTR(mode_static,               0220, NULL, razer_attr_write_mode_static);
 static DEVICE_ATTR(mode_wave,                 0220, NULL, razer_attr_write_mode_wave);
 static DEVICE_ATTR(mode_spectrum,             0220, NULL, razer_attr_write_mode_spectrum);
 static DEVICE_ATTR(mode_reactive,             0220, NULL, razer_attr_write_mode_reactive);
 static DEVICE_ATTR(mode_breath,               0220, NULL, razer_attr_write_mode_breath);
+static DEVICE_ATTR(mode_none,                 0220, NULL, razer_attr_write_mode_none);
+
+static DEVICE_ATTR(mode_logo_static,          0220, NULL, razer_attr_write_mode_logo_static);
+static DEVICE_ATTR(mode_logo_spectrum,        0220, NULL, razer_attr_write_mode_logo_spectrum);
+static DEVICE_ATTR(mode_logo_none,            0220, NULL, razer_attr_write_mode_logo_none);
+
+static DEVICE_ATTR(mode_scrollwheel_static,   0220, NULL, razer_attr_write_mode_scrollwheel_static);
+static DEVICE_ATTR(mode_scrollwheel_spectrum, 0220, NULL, razer_attr_write_mode_scrollwheel_spectrum);
+static DEVICE_ATTR(mode_scrollwheel_none,     0220, NULL, razer_attr_write_mode_scrollwheel_none);
+
 static DEVICE_ATTR(set_key_row,               0220, NULL, razer_attr_write_set_key_row);
 static DEVICE_ATTR(set_wireless_brightness,   0220, NULL, razer_attr_write_set_wireless_brightness);
 static DEVICE_ATTR(set_low_battery_threshold, 0220, NULL, razer_attr_write_set_low_battery_threshold);
@@ -966,7 +1284,7 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
 {
     int retval;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    //struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
     struct razer_mouse_device *dev = NULL;
 
     dev = kzalloc(sizeof(struct razer_mouse_device), GFP_KERNEL);
@@ -976,55 +1294,84 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
         goto exit;
     }
 
-    retval = device_create_file(&hdev->dev, &dev_attr_get_battery);
-    if (retval)
-        goto exit_free;
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA)
+    {
+        // Deathadder Chroma is wired and only has two LEDs, with independent modes
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_logo_static);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_logo_spectrum);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_logo_none);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_scrollwheel_static);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_scrollwheel_spectrum);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_scrollwheel_none);
+        if (retval)
+            goto exit_free;
+    } else
+    {
+        // Mamba
+        retval = device_create_file(&hdev->dev, &dev_attr_get_battery);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_is_charging);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_set_wireless_brightness);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_set_low_battery_threshold);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_set_idle_time);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_set_charging_effect);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_set_charging_colour);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_wave);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_custom);
+        if (retval)
+            goto exit_free;
+        retval = device_create_file(&hdev->dev, &dev_attr_mode_reactive);
+        if (retval)
+            goto exit_free;
+    }
+
     retval = device_create_file(&hdev->dev, &dev_attr_get_serial);
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_device_type);
     if (retval)
         goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_is_charging);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_set_key_row);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_set_wireless_brightness);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_set_low_battery_threshold);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_set_idle_time);
-    if (retval)
-        goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_set_mouse_dpi);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_set_charging_effect);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_set_charging_colour);
     if (retval)
         goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_mode_static);
     if (retval)
         goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_wave);
-    if (retval)
-        goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_custom);
-    if (retval)
-        goto exit_free;
     retval = device_create_file(&hdev->dev, &dev_attr_mode_spectrum);
     if (retval)
         goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_reactive);
+    retval = device_create_file(&hdev->dev, &dev_attr_mode_breath);
     if (retval)
         goto exit_free;
-    retval = device_create_file(&hdev->dev, &dev_attr_mode_breath);
+    retval = device_create_file(&hdev->dev, &dev_attr_mode_none);
     if (retval)
         goto exit_free;
 
@@ -1060,27 +1407,41 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
 {
     struct razer_mouse_device *dev;
     struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    //struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct usb_device *usb_dev = interface_to_usbdev(intf);
 
     dev = hid_get_drvdata(hdev);
 
-    device_remove_file(&hdev->dev, &dev_attr_get_battery);
+    if(usb_dev->descriptor.idProduct == USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA)
+    {
+        device_remove_file(&hdev->dev, &dev_attr_mode_logo_static);
+        device_remove_file(&hdev->dev, &dev_attr_mode_logo_spectrum);
+        device_remove_file(&hdev->dev, &dev_attr_mode_logo_none);
+        device_remove_file(&hdev->dev, &dev_attr_mode_scrollwheel_static);
+        device_remove_file(&hdev->dev, &dev_attr_mode_scrollwheel_spectrum);
+        device_remove_file(&hdev->dev, &dev_attr_mode_scrollwheel_none);
+    } else
+    {
+        // Mamba
+        device_remove_file(&hdev->dev, &dev_attr_get_battery);
+        device_remove_file(&hdev->dev, &dev_attr_is_charging);
+        device_remove_file(&hdev->dev, &dev_attr_set_key_row);
+        device_remove_file(&hdev->dev, &dev_attr_set_wireless_brightness);
+        device_remove_file(&hdev->dev, &dev_attr_set_low_battery_threshold);
+        device_remove_file(&hdev->dev, &dev_attr_set_idle_time);
+        device_remove_file(&hdev->dev, &dev_attr_set_charging_effect);
+        device_remove_file(&hdev->dev, &dev_attr_set_charging_colour);
+        device_remove_file(&hdev->dev, &dev_attr_mode_custom);
+        device_remove_file(&hdev->dev, &dev_attr_mode_wave);
+        device_remove_file(&hdev->dev, &dev_attr_mode_reactive);
+    }
+
     device_remove_file(&hdev->dev, &dev_attr_get_serial);
-    device_remove_file(&hdev->dev, &dev_attr_is_charging);
-    device_remove_file(&hdev->dev, &dev_attr_set_key_row);
-    device_remove_file(&hdev->dev, &dev_attr_set_wireless_brightness);
-    device_remove_file(&hdev->dev, &dev_attr_set_low_battery_threshold);
-    device_remove_file(&hdev->dev, &dev_attr_set_idle_time);
-    device_remove_file(&hdev->dev, &dev_attr_set_mouse_dpi);
-    device_remove_file(&hdev->dev, &dev_attr_set_charging_effect);
-    device_remove_file(&hdev->dev, &dev_attr_set_charging_colour);
-    device_remove_file(&hdev->dev, &dev_attr_mode_custom);
-    device_remove_file(&hdev->dev, &dev_attr_mode_static);
-    device_remove_file(&hdev->dev, &dev_attr_mode_wave);
-    device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);
-    device_remove_file(&hdev->dev, &dev_attr_mode_reactive);
-    device_remove_file(&hdev->dev, &dev_attr_mode_breath);
     device_remove_file(&hdev->dev, &dev_attr_device_type);
+    device_remove_file(&hdev->dev, &dev_attr_set_mouse_dpi);
+    device_remove_file(&hdev->dev, &dev_attr_mode_static);
+    device_remove_file(&hdev->dev, &dev_attr_mode_spectrum);
+    device_remove_file(&hdev->dev, &dev_attr_mode_breath);
+    device_remove_file(&hdev->dev, &dev_attr_mode_none);
 
     hid_hw_stop(hdev);
     kfree(dev);
@@ -1093,6 +1454,7 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
  */
 static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_MAMBA) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_DEATHADDER_CHROMA) },
     { }
 };
 

@@ -18,6 +18,7 @@ def clamp_to_u8(value):
 def parse_args():
     parser = argparse.ArgumentParser(description="Set the spectrum effect")
     parser.add_argument('-d', '--device', type=str, help="Device string like \"0003:1532:0045.000C\"")
+    parser.add_argument('-c', '--channel', type=str, help='LED channel: all, logo, scrollwheel', default='all')
 
     args = parser.parse_args()
     return args
@@ -45,7 +46,13 @@ def run():
 
     byte_string = struct.pack(">B", 0x01)
 
-    spectrum_mode_filepath = os.path.join(mouse_dir, "mode_spectrum")
+    filename = {
+        'all': 'mode_spectrum',
+        'logo': 'mode_logo_spectrum',
+        'scrollwheel': 'mode_scrollwheel_spectrum',
+    }[args.channel]
+
+    spectrum_mode_filepath = os.path.join(mouse_dir, filename)
     with open(spectrum_mode_filepath, 'wb') as spectrum_mode_file:
         spectrum_mode_file.write(byte_string)
     print("Done")
